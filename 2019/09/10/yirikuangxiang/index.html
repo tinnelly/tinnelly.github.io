@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="baidu-site-verification" content="code-fdbRaFZDMj" />
+
+    <!--Description-->
+    
+        <meta name="description" content="决定雇佣自己的一天。">
+    
+
+    <!--Author-->
+    
+
+    <!-- Title -->
+    
+    <title>一日狂想 | 田耐里</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!-- Custom Fonts -->
+    <link href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Noto+Serif:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- jQuery -->
+    <script src="//cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<!-- Search -->
+
+    <a class="nav-search" data-toggle="modal" data-target="#searchModalCenter">
+      <i class="fa fa-search"></i>
+    </a>
+    
+    <div
+      class="modal fade"
+      id="searchModalCenter"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="searchModalCenterTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <input
+              type="text"
+              id="local-search-input"
+              class="form-control"
+              placeholder=""
+            />
+          </div>
+          <div class="modal-body">
+            <div id="local-search-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script type="text/javascript">
+      // define the search function
+      var searchFunc = function(path, search_id, content_id) {
+        "use strict";
+        $.ajax({
+          url: path,
+          dataType: "xml",
+          success: function(xmlResponse) {
+            // get the contents from search data
+            var datas = $("entry", xmlResponse)
+              .map(function() {
+                return {
+                  title: $("title", this).text(),
+                  content: $("content", this).text(),
+                  url: $("id", this).text()
+                };
+              })
+              .get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener("input", function() {
+              var str = '<ul class="search-result-list">';
+              var keywords = this.value
+                .trim()
+                .toLowerCase()
+                .split(/[\s\-]+/);
+              $resultContent.innerHTML = "";
+              if (this.value.trim().length <= 0) {
+                return;
+              }
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = true;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content
+                  .trim()
+                  .replace(/<[^>]+>/g, "")
+                  .toLowerCase();
+                var data_url = data.url;
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if (data_title != "" && data_content != "") {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if (index_title < 0 && index_content < 0) {
+                      isMatch = false;
+                    } else {
+                      if (index_content < 0) {
+                        index_content = 0;
+                      }
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  str +=
+                    "<li><a href='" +
+                    data_url +
+                    "' class='search-result-title'>" +
+                    data_title +
+                    "</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g, "");
+                  if (first_occur >= 0) {
+                    // cut out 30 characters
+                    var start = first_occur - 15;
+                    var end = first_occur + 15;
+                    if (start < 0) {
+                      start = 0;
+                    }
+                    if (start == 0) {
+                      end = 30;
+                    }
+                    if (end > content.length) {
+                      end = content.length;
+                    }
+    
+                    var match_content = content.substr(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword) {
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(
+                        regS,
+                        '<em class="search-keyword">' + keyword + "</em>"
+                      );
+                    });
+    
+                    str += '<p class="search-result">' + match_content + "...</p>";
+                  }
+                  str += "</li>";
+                }
+              });
+              str += "</ul>";
+              $resultContent.innerHTML = str;
+            });
+          }
+        });
+      };
+    
+      // use atom.xml to search blog
+      searchFunc("/atom.xml", "local-search-input", "local-search-result");
+      $("#searchModalCenter").on("shown.bs.modal", function(e) {
+        setTimeout(function() {
+          $("#local-search-input").focus();
+        }, 1);
+      });
+    </script>
+
+
+
+<body>
+	<!-- Search -->
+	
+    <a class="nav-search" data-toggle="modal" data-target="#searchModalCenter">
+      <i class="fa fa-search"></i>
+    </a>
+    
+    <div
+      class="modal fade"
+      id="searchModalCenter"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="searchModalCenterTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <input
+              type="text"
+              id="local-search-input"
+              class="form-control"
+              placeholder=""
+            />
+          </div>
+          <div class="modal-body">
+            <div id="local-search-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script type="text/javascript">
+      // define the search function
+      var searchFunc = function(path, search_id, content_id) {
+        "use strict";
+        $.ajax({
+          url: path,
+          dataType: "xml",
+          success: function(xmlResponse) {
+            // get the contents from search data
+            var datas = $("entry", xmlResponse)
+              .map(function() {
+                return {
+                  title: $("title", this).text(),
+                  content: $("content", this).text(),
+                  url: $("id", this).text()
+                };
+              })
+              .get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener("input", function() {
+              var str = '<ul class="search-result-list">';
+              var keywords = this.value
+                .trim()
+                .toLowerCase()
+                .split(/[\s\-]+/);
+              $resultContent.innerHTML = "";
+              if (this.value.trim().length <= 0) {
+                return;
+              }
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = true;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content
+                  .trim()
+                  .replace(/<[^>]+>/g, "")
+                  .toLowerCase();
+                var data_url = data.url;
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if (data_title != "" && data_content != "") {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if (index_title < 0 && index_content < 0) {
+                      isMatch = false;
+                    } else {
+                      if (index_content < 0) {
+                        index_content = 0;
+                      }
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  str +=
+                    "<li><a href='" +
+                    data_url +
+                    "' class='search-result-title'>" +
+                    data_title +
+                    "</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g, "");
+                  if (first_occur >= 0) {
+                    // cut out 30 characters
+                    var start = first_occur - 15;
+                    var end = first_occur + 15;
+                    if (start < 0) {
+                      start = 0;
+                    }
+                    if (start == 0) {
+                      end = 30;
+                    }
+                    if (end > content.length) {
+                      end = content.length;
+                    }
+    
+                    var match_content = content.substr(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword) {
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(
+                        regS,
+                        '<em class="search-keyword">' + keyword + "</em>"
+                      );
+                    });
+    
+                    str += '<p class="search-result">' + match_content + "...</p>";
+                  }
+                  str += "</li>";
+                }
+              });
+              str += "</ul>";
+              $resultContent.innerHTML = str;
+            });
+          }
+        });
+      };
+    
+      // use atom.xml to search blog
+      searchFunc("/atom.xml", "local-search-input", "local-search-result");
+      $("#searchModalCenter").on("shown.bs.modal", function(e) {
+        setTimeout(function() {
+          $("#local-search-input").focus();
+        }, 1);
+      });
+    </script>
+
+
+    <!-- Content -->
+    <section class="article-container">
+    <!-- Back Home -->
+    <a class="nav-back" href="/">
+    <font size="16">田耐里</font>
+</a>
+
+        <!-- Page Header -->
+        <header class="intro-header">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <div class="post-heading">
+                            <h1>
+                                一日狂想
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Post Content -->
+        <article>
+            <div class="container">
+                <div class="row">
+                    <!-- Post Main Content -->
+                    <div class="post-content col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <p>决定雇佣自己的一天。<a id="more"></a></p>
+<p>太久没有干设计的活计了，不确定自己能不能吃这碗饭。于是想来拿自己试试手，为自己设计。<br>哦，瞧瞧我这个网名，谁能想到它原本是一种药材，是闽南语里[棉茵陈]的叫法。它没有任何寓意，起这个名字是个随机事件，如同匪夷所思的甲方需求一样也是不确定的。但还是要为它开工。<br>这是我的草图：<br><img src="sketch.jpg" alt="sketch"><br>真的是很草了。</p>
+<p>以下是方案汇总：<br>1：<br><img src="tinnelly-circle.png" alt="tinnelly-circle"><br>这是一个最初的方案，是我最开始的想法，停留在脑子里面很久的图形。如果我不继续做推进的话，它就是最终结果。我不太喜欢它，显得过于圆润，田字写圆了，不论怎么调整都像轮子，这可不太妙。它的延伸设计也不好往下推进(不能很好的往下编）</p>
+<p>2：<br><img src="tinnelly-xianxi.png" alt="tinnelly-xianxi"><br>这个方案里我醒悟了，找到了一种沉稳的字形结构，纤细优雅，我——开始显得有文化。它中规中矩，不太会出错，能在很多地方看到类似的设计。它也很好画，直线工具就能搞定。但我不确定中文字体库有没有差不太多的字形，它的标识感不强，我可能还会在细节上调整它。</p>
+<p>3：<br><img src="tinnelly-black.jpg" alt="tinnelly-black"><br>这是一个又粗又黑的方块，这里用到了负形设计。我不太擅长负形设计，犹如我的版画作业一向很糟一样。细细的线条像在一张纸上用刀片划开。<br>这种设计不是我的原创，比如我就找到了英文字体[QUB]也在用这种设计，于是我直接下载了它用来写域名，省了很多事，也让设计语言看起来很统一：D<br>这个设计有一个问题，如果图案过于小的话，那写细线就会看不见，而如果加粗线条，又显得不那么有逼格。这个图案适合放在底色很绚的图片上，颜色透过细线透出来，但我还没有找到合适的图片。<br>因为黑色看起来压迫感比较强，而我毕竟是个娘们，所以做了这个死亡配色版，补色关系让它看起来很刺激，很符合我现在的精神状态。<br><img src="tinnelly-color.png" alt="tinnelly-color"></p>
+<p>我觉得它很适合放在webapp启动加载页面，所以做了一个只有田字的版本，它也很适合做图标：<br><img src="tinnelly-color2.png" alt="tinnelly-color2"><br><img src="tinnelly-color3.png" alt="tinnelly-color3"></p>
+<p>4：<br><img src="tinnelly-like.png" alt="tinnelly-like"><br>这是我草图上那个想法的实现。我喜欢它。我喜欢方形、线条。这个图做的我很爽快。做完之后我发现我能在其中找到“田耐里”三个字的首字母“T,N,L”,这激发了我更多想法。<br><img src="tinnelly-like2.png" alt="tinnelly-like2"><br>这是上面的延伸，我觉得能做延伸设计是一个想法成熟的表现。因为可能要在很多地方应用它。如果它只有一种形态变化，就会显得很被动。<br><img src="kandinsky.png" alt="tinnelly-like2"><br>这是色彩方案。这个图也是“做爽了”系列，因为通过颜色，我在“田耐里”这个字形里找到了我的域名TINNELLY.ME的拆解(但我没有找到M，很难过，逼死完美主义者)。我的作品开始有自己的内部逻辑，并且能够自冾。我可以不用动脑了，它们带着我走，还有比这更爽的事吗。</p>
+<p>我还可以通过此致敬伟大的艺术家们：康定斯基、蒙特里安、马列维奇。<br><img src="ysuper-kandinsky.png" alt="tinnelly-like2"><br>我反正玩爽了。累且开心。</p>
+<p>等等。所以到底该用哪个方案。<br>我可能还要想想。</p>
+<p>最后，感谢这本《上海字记》，提供了很多灵感。这是一本记录一百年间上海印刷品实物的书。在那个简体汉字字形还没有完全被确定下来，设计还没有具体的规范下，我感受到各种想法的繁盛与纷争，一些设计即使现在看也很超前。<br><img src="shanghai-fonts.jpg" alt="shanghai-fonts"><br>感谢马列维奇、感谢康定斯基，俄罗斯艺术宝库毕生取之不竭。<br><img src="malievichy.jpg" alt="malievichy"><br>图片摄于埃尔米塔什博物馆 《Супрематизм № 56》 1915-1916</p>
+
+
+                            <!-- Meta -->
+                            <div class="post-meta">
+                                <hr>
+                                <br>
+                                <div class="post-tags">
+                                    
+                                        
+
+<a href="/tags/设计/">#设计</a>
+
+
+                                            
+                                </div>
+                                <div class="post-date">
+                                    2019 年 09 月 10 日
+                                </div>
+                            </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <i class="fa fa-paw" aria-hidden="true"></i><span> 留言</span>
+<head>
+    <script src="/js/src/Valine.min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+</head>
+
+<body>
+    <div id="vcomments"></div>
+    <script>
+    var GUEST_INFO=["nick","mail","link"],
+    guest_info="nick,mail".split(",").
+    filter(function(e){return GUEST_INFO.indexOf(e)>-1});
+    guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+    var verify = 'false' == true;
+new Valine({
+    el: '#vcomments' ,
+    appId: 'D1gAVrrs69QsQXCmMa8xnw09-gzGzoHsz',
+    appKey: 'OBFR8X1YHEylR5rX7MYVwYSH',
+    verify: false,
+    avatar:'hide',
+    guest_info: guest_info,
+    notify: true,
+    recordIP: false,
+    placeholder: '这是一个评论模块(๑•ᴗ•๑)这显得很酷',
+    pageSize:"10"
+});
+	$(document).ready(function(){
+    $('.vemoji-btn').text('😀');
+    $("#vcomments").on('click', 'span.vat',function(){
+        $(this).parent('div.vmeta').next("div.vcontent").after($("div.vwrap"));
+        $('textarea#veditor').focus();
+    })
+})
+if(window.location.hash){
+    var checkExist = setInterval(function() {
+        if ($(window.location.hash).length) {
+            $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+            clearInterval(checkExist);
+        }
+    }, 100);
+}
+    </script>
+</body>
+
+                    </div>
+                </div>
+            </div>
+        </article>
+</section>
+
+<!-- Image viewer-->
+
+    <!-- Custom picture view-->
+    <link href="/css/viewer.min.css" rel="stylesheet" />
+    <script
+      src="/js/viewer.min.js"
+      type="text/javascript"
+      charset="utf-8"
+    ></script>
+    
+    <script type="text/javascript">
+      // set image viewer
+      Viewer.setDefaults({
+        zoomRatio: [0.5],
+        navbar: false,
+        toolbar: false,
+        button: false,
+        title: [2, (image, imageData) => `${image.alt}`],
+        show: function() {
+          this.viewer.zoomTo(0.5);
+        }
+      });
+      var imageList = document.getElementsByTagName("img");
+      Array.prototype.forEach.call(imageList, element => {
+        var viewer = new Viewer(element);
+      });
+    </script>
+
+    
+    <!-- Scripts -->
+     <footer class="footer">
+         </P> <span>田耐里 <i class="fa fa-smile-o"></i> 2017-</span><script>document.write(new Date().getFullYear())</script>
+        
+</footer>
+    <!-- Google Analytics -->
+    
+
+    <!-- Service Worker -->
+    <!-- if using service worker -->
+
+    
+</body>
+
+</html>

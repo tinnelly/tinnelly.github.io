@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="baidu-site-verification" content="code-fdbRaFZDMj" />
+
+    <!--Description-->
+    
+        <meta name="description" content="我正路过稻草地，复合化肥刚撒上，空气有点沉重，我看见点阵人正在搓脚垢，这是不常见的场景，我上前与他搭话。">
+    
+
+    <!--Author-->
+    
+
+    <!-- Title -->
+    
+    <title>点阵人和捕快-Я | 田耐里</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!-- Custom Fonts -->
+    <link href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Noto+Serif:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- jQuery -->
+    <script src="//cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<!-- Search -->
+
+    <a class="nav-search" data-toggle="modal" data-target="#searchModalCenter">
+      <i class="fa fa-search"></i>
+    </a>
+    
+    <div
+      class="modal fade"
+      id="searchModalCenter"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="searchModalCenterTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <input
+              type="text"
+              id="local-search-input"
+              class="form-control"
+              placeholder=""
+            />
+          </div>
+          <div class="modal-body">
+            <div id="local-search-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script type="text/javascript">
+      // define the search function
+      var searchFunc = function(path, search_id, content_id) {
+        "use strict";
+        $.ajax({
+          url: path,
+          dataType: "xml",
+          success: function(xmlResponse) {
+            // get the contents from search data
+            var datas = $("entry", xmlResponse)
+              .map(function() {
+                return {
+                  title: $("title", this).text(),
+                  content: $("content", this).text(),
+                  url: $("id", this).text()
+                };
+              })
+              .get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener("input", function() {
+              var str = '<ul class="search-result-list">';
+              var keywords = this.value
+                .trim()
+                .toLowerCase()
+                .split(/[\s\-]+/);
+              $resultContent.innerHTML = "";
+              if (this.value.trim().length <= 0) {
+                return;
+              }
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = true;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content
+                  .trim()
+                  .replace(/<[^>]+>/g, "")
+                  .toLowerCase();
+                var data_url = data.url;
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if (data_title != "" && data_content != "") {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if (index_title < 0 && index_content < 0) {
+                      isMatch = false;
+                    } else {
+                      if (index_content < 0) {
+                        index_content = 0;
+                      }
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  str +=
+                    "<li><a href='" +
+                    data_url +
+                    "' class='search-result-title'>" +
+                    data_title +
+                    "</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g, "");
+                  if (first_occur >= 0) {
+                    // cut out 30 characters
+                    var start = first_occur - 15;
+                    var end = first_occur + 15;
+                    if (start < 0) {
+                      start = 0;
+                    }
+                    if (start == 0) {
+                      end = 30;
+                    }
+                    if (end > content.length) {
+                      end = content.length;
+                    }
+    
+                    var match_content = content.substr(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword) {
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(
+                        regS,
+                        '<em class="search-keyword">' + keyword + "</em>"
+                      );
+                    });
+    
+                    str += '<p class="search-result">' + match_content + "...</p>";
+                  }
+                  str += "</li>";
+                }
+              });
+              str += "</ul>";
+              $resultContent.innerHTML = str;
+            });
+          }
+        });
+      };
+    
+      // use atom.xml to search blog
+      searchFunc("/atom.xml", "local-search-input", "local-search-result");
+      $("#searchModalCenter").on("shown.bs.modal", function(e) {
+        setTimeout(function() {
+          $("#local-search-input").focus();
+        }, 1);
+      });
+    </script>
+
+
+
+<body>
+	<!-- Search -->
+	
+    <a class="nav-search" data-toggle="modal" data-target="#searchModalCenter">
+      <i class="fa fa-search"></i>
+    </a>
+    
+    <div
+      class="modal fade"
+      id="searchModalCenter"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="searchModalCenterTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <input
+              type="text"
+              id="local-search-input"
+              class="form-control"
+              placeholder=""
+            />
+          </div>
+          <div class="modal-body">
+            <div id="local-search-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script type="text/javascript">
+      // define the search function
+      var searchFunc = function(path, search_id, content_id) {
+        "use strict";
+        $.ajax({
+          url: path,
+          dataType: "xml",
+          success: function(xmlResponse) {
+            // get the contents from search data
+            var datas = $("entry", xmlResponse)
+              .map(function() {
+                return {
+                  title: $("title", this).text(),
+                  content: $("content", this).text(),
+                  url: $("id", this).text()
+                };
+              })
+              .get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener("input", function() {
+              var str = '<ul class="search-result-list">';
+              var keywords = this.value
+                .trim()
+                .toLowerCase()
+                .split(/[\s\-]+/);
+              $resultContent.innerHTML = "";
+              if (this.value.trim().length <= 0) {
+                return;
+              }
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = true;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content
+                  .trim()
+                  .replace(/<[^>]+>/g, "")
+                  .toLowerCase();
+                var data_url = data.url;
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if (data_title != "" && data_content != "") {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if (index_title < 0 && index_content < 0) {
+                      isMatch = false;
+                    } else {
+                      if (index_content < 0) {
+                        index_content = 0;
+                      }
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  str +=
+                    "<li><a href='" +
+                    data_url +
+                    "' class='search-result-title'>" +
+                    data_title +
+                    "</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g, "");
+                  if (first_occur >= 0) {
+                    // cut out 30 characters
+                    var start = first_occur - 15;
+                    var end = first_occur + 15;
+                    if (start < 0) {
+                      start = 0;
+                    }
+                    if (start == 0) {
+                      end = 30;
+                    }
+                    if (end > content.length) {
+                      end = content.length;
+                    }
+    
+                    var match_content = content.substr(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword) {
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(
+                        regS,
+                        '<em class="search-keyword">' + keyword + "</em>"
+                      );
+                    });
+    
+                    str += '<p class="search-result">' + match_content + "...</p>";
+                  }
+                  str += "</li>";
+                }
+              });
+              str += "</ul>";
+              $resultContent.innerHTML = str;
+            });
+          }
+        });
+      };
+    
+      // use atom.xml to search blog
+      searchFunc("/atom.xml", "local-search-input", "local-search-result");
+      $("#searchModalCenter").on("shown.bs.modal", function(e) {
+        setTimeout(function() {
+          $("#local-search-input").focus();
+        }, 1);
+      });
+    </script>
+
+
+    <!-- Content -->
+    <section class="article-container">
+    <!-- Back Home -->
+    <a class="nav-back" href="/">
+    <font size="16">田耐里</font>
+</a>
+
+        <!-- Page Header -->
+        <header class="intro-header">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <div class="post-heading">
+                            <h1>
+                                点阵人和捕快-Я
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Post Content -->
+        <article>
+            <div class="container">
+                <div class="row">
+                    <!-- Post Main Content -->
+                    <div class="post-content col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <p>我正路过稻草地，复合化肥刚撒上，空气有点沉重，我看见点阵人正在搓脚垢，这是不常见的场景，我上前与他搭话。<a id="more"></a></p>
+<p>“你为什么在这里搓脚。”</p>
+<p>“这里尘埃下落的慢，我恰好有时间与他们道别。”</p>
+<p>点阵人在稻草地里搓脚垢，为什么说这件事不常见。因为通常他们都在墙壁上贴着，我们正常人贴在墙上需要屏住呼吸，而点阵人无需费力就可以贴在墙上。若他们想，他们完全可以伪装成是墙上的拼贴画。</p>
+<p>点阵人在散漫复合化肥的稻草地上搓脚，空气里都是尘土。我看见我看见它的皮屑掉下，五颜六色的小方块。我常想，显示屏碎掉是不是就是五颜六色的小方块。为此，我摔了两块屏幕，得到了一包玻璃。此刻我看着这些小方块发呆，希望点阵人看穿我的心思，予我一块儿开眼。</p>
+<p>我不是第一次觉得点阵人独特，它们遗传神农氏的透明肚皮，我站着离它不到三米，却能看见它的内脏。他那迷宫般的肠胃，慢慢饱合的肺，还有那颗放在两个方括号之间的心。</p>
+<p>点阵人和捕快-Я的关系吸引了稻草地上的土著，但是我们谁也没有真正弄清个中详细。这个事要怪点阵人，他说话总是飘忽不定，让人迷惑。比如我问他为什么搓脚，他就没给我讲清。但我想，一头弄不清，我就去堵另外一头，于是我就去找了捕快-Я。</p>
+<p>捕快-Я第一次出现在稻草地上，就掀起了一阵风波。传说他的终极对手，是一个镜像捕快-R。这件事听起来就可怕，我们面前出现了两个捕快在稻草地上厮杀。我们连夜草拟了《关于如何面临二级灾害的注意事项》。土著里心思细腻的农妇，甚至藏起了铜镜，生怕捕快-Я看见，错当成自己的对手。</p>
+<p>这一天，捕快-Я站在稻草地上，外放一首江湖歌曲串烧，拍拍长褂，哼哼唧唧的走动着。我们中有人上去问他放的是不是“好请人做客”，他就一脸的不高兴，只管走自己的路。</p>
+<p>捕快-Я撞在墙上时离稻草地已有两三里地。这时，属于稻草地的那片烟尘和人气已经过去。墙上啥也没有，气氛宁静。捕快-Я只沉默了一秒，就收起了外放音箱，脸上也换了另外一种表情。这时，他听见墙上有树皮剥离的声音，那是点阵人在转身。点阵人本来在趴睡。这时它转过身，拨出一只眼睛，渐渐蹲下来，望着捕快-Я：</p>
+<p>你好，弱者。</p>
+<p>捕快-Я吓得大惊，倒不是他从来没见过会动的墙壁。而是自己不够气派的那一面竟然被人瞧见。他在心里偷偷遍历了刚才的动作分解，确定没有补救。</p>
+<p>“你是？”他从牙缝了挤出了这个单词。</p>
+<p>“一只活生生的点阵人XD”点阵人又转了遍身，身上的色块忙不跌地更换坐标，半透明的轮廓在墙壁上流转。</p>
+<p>这次初次相遇，捕快-Я觉得点阵人不但缺乏礼节，还很喧闹。他计划，下次寻找终极对手行动，一定避开稻草地。</p>
+<p>捕快-Я决定不再踏进稻草地的事，我们土著一下全知道了。这让我们的家园安宁，于是，排起长队，拿着自己家的收成，准备进献点阵人。至于消息是不是点阵人自己散布的，我们谁也没有细想。</p>
+<p>我们在稻草地上排起了浩浩荡荡的长队，这队伍从头看不见尾，看起来像是没有移动。太阳如日中天，土著们的视野里是一片黄。我们走了四五里，并不长的路，但是每个人都要根据前方人的步长确定自己的步长，这件事想起来就费劲。于是每个人都仔细的度量着、计算着，数据精确到小数点后九位。</p>
+<p>这样低头走了很久，队伍忽然不动了。显然，我们计算出一个“0”。队伍领头是会古瘌痢，是土著里一只上了年纪的豹猫。它只要一仰头，嘴巴就会微张。这次，古瘌痢站在队伍前面，没看见墙，碰花了眼。它抬起头，嘴巴长开，瞳孔一会放大一会缩小，脑袋内拉起了风箱。</p>
+<p>贴在墙壁上正是变幻莫测的点阵人，我们故事的主角。</p>
+
+
+                            <!-- Meta -->
+                            <div class="post-meta">
+                                <hr>
+                                <br>
+                                <div class="post-tags">
+                                    
+                                        
+
+<a href="/tags/儿童故事/">#儿童故事</a>
+
+
+                                            
+                                </div>
+                                <div class="post-date">
+                                    2017 年 03 月 16 日
+                                </div>
+                            </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <i class="fa fa-paw" aria-hidden="true"></i><span> 留言</span>
+<head>
+    <script src="/js/src/Valine.min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+</head>
+
+<body>
+    <div id="vcomments"></div>
+    <script>
+    var GUEST_INFO=["nick","mail","link"],
+    guest_info="nick,mail".split(",").
+    filter(function(e){return GUEST_INFO.indexOf(e)>-1});
+    guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+    var verify = 'false' == true;
+new Valine({
+    el: '#vcomments' ,
+    appId: 'D1gAVrrs69QsQXCmMa8xnw09-gzGzoHsz',
+    appKey: 'OBFR8X1YHEylR5rX7MYVwYSH',
+    verify: false,
+    avatar:'hide',
+    guest_info: guest_info,
+    notify: true,
+    recordIP: false,
+    placeholder: '这是一个评论模块(๑•ᴗ•๑)这显得很酷',
+    pageSize:"10"
+});
+	$(document).ready(function(){
+    $('.vemoji-btn').text('😀');
+    $("#vcomments").on('click', 'span.vat',function(){
+        $(this).parent('div.vmeta').next("div.vcontent").after($("div.vwrap"));
+        $('textarea#veditor').focus();
+    })
+})
+if(window.location.hash){
+    var checkExist = setInterval(function() {
+        if ($(window.location.hash).length) {
+            $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+            clearInterval(checkExist);
+        }
+    }, 100);
+}
+    </script>
+</body>
+
+                    </div>
+                </div>
+            </div>
+        </article>
+</section>
+
+<!-- Image viewer-->
+
+    <!-- Custom picture view-->
+    <link href="/css/viewer.min.css" rel="stylesheet" />
+    <script
+      src="/js/viewer.min.js"
+      type="text/javascript"
+      charset="utf-8"
+    ></script>
+    
+    <script type="text/javascript">
+      // set image viewer
+      Viewer.setDefaults({
+        zoomRatio: [0.5],
+        navbar: false,
+        toolbar: false,
+        button: false,
+        title: [2, (image, imageData) => `${image.alt}`],
+        show: function() {
+          this.viewer.zoomTo(0.5);
+        }
+      });
+      var imageList = document.getElementsByTagName("img");
+      Array.prototype.forEach.call(imageList, element => {
+        var viewer = new Viewer(element);
+      });
+    </script>
+
+    
+    <!-- Scripts -->
+     <footer class="footer">
+         </P> <span>田耐里 <i class="fa fa-smile-o"></i> 2017-</span><script>document.write(new Date().getFullYear())</script>
+        
+</footer>
+    <!-- Google Analytics -->
+    
+
+    <!-- Service Worker -->
+    <!-- if using service worker -->
+
+    
+</body>
+
+</html>

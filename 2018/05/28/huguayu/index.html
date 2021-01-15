@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="zh-Hans">
+
+<!-- Head tag -->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="baidu-site-verification" content="code-fdbRaFZDMj" />
+
+    <!--Description-->
+    
+        <meta name="description" content="我的蠢猫从高处跌落，死了。">
+    
+
+    <!--Author-->
+    
+
+    <!-- Title -->
+    
+    <title>胡瓜鱼 前进 | 田耐里</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="//cdn.bootcss.com/bootstrap/3.3.6/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+
+    <!-- Custom Fonts -->
+    <link href="//cdn.bootcss.com/font-awesome/4.5.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Noto+Serif:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- jQuery -->
+    <script src="//cdn.bootcss.com/jquery/2.2.1/jquery.min.js"></script>
+    <!-- Bootstrap -->
+    <script src="//cdn.bootcss.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+    <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+<meta name="generator" content="Hexo 5.3.0"></head>
+
+<!-- Search -->
+
+    <a class="nav-search" data-toggle="modal" data-target="#searchModalCenter">
+      <i class="fa fa-search"></i>
+    </a>
+    
+    <div
+      class="modal fade"
+      id="searchModalCenter"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="searchModalCenterTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <input
+              type="text"
+              id="local-search-input"
+              class="form-control"
+              placeholder=""
+            />
+          </div>
+          <div class="modal-body">
+            <div id="local-search-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script type="text/javascript">
+      // define the search function
+      var searchFunc = function(path, search_id, content_id) {
+        "use strict";
+        $.ajax({
+          url: path,
+          dataType: "xml",
+          success: function(xmlResponse) {
+            // get the contents from search data
+            var datas = $("entry", xmlResponse)
+              .map(function() {
+                return {
+                  title: $("title", this).text(),
+                  content: $("content", this).text(),
+                  url: $("id", this).text()
+                };
+              })
+              .get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener("input", function() {
+              var str = '<ul class="search-result-list">';
+              var keywords = this.value
+                .trim()
+                .toLowerCase()
+                .split(/[\s\-]+/);
+              $resultContent.innerHTML = "";
+              if (this.value.trim().length <= 0) {
+                return;
+              }
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = true;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content
+                  .trim()
+                  .replace(/<[^>]+>/g, "")
+                  .toLowerCase();
+                var data_url = data.url;
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if (data_title != "" && data_content != "") {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if (index_title < 0 && index_content < 0) {
+                      isMatch = false;
+                    } else {
+                      if (index_content < 0) {
+                        index_content = 0;
+                      }
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  str +=
+                    "<li><a href='" +
+                    data_url +
+                    "' class='search-result-title'>" +
+                    data_title +
+                    "</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g, "");
+                  if (first_occur >= 0) {
+                    // cut out 30 characters
+                    var start = first_occur - 15;
+                    var end = first_occur + 15;
+                    if (start < 0) {
+                      start = 0;
+                    }
+                    if (start == 0) {
+                      end = 30;
+                    }
+                    if (end > content.length) {
+                      end = content.length;
+                    }
+    
+                    var match_content = content.substr(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword) {
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(
+                        regS,
+                        '<em class="search-keyword">' + keyword + "</em>"
+                      );
+                    });
+    
+                    str += '<p class="search-result">' + match_content + "...</p>";
+                  }
+                  str += "</li>";
+                }
+              });
+              str += "</ul>";
+              $resultContent.innerHTML = str;
+            });
+          }
+        });
+      };
+    
+      // use atom.xml to search blog
+      searchFunc("/atom.xml", "local-search-input", "local-search-result");
+      $("#searchModalCenter").on("shown.bs.modal", function(e) {
+        setTimeout(function() {
+          $("#local-search-input").focus();
+        }, 1);
+      });
+    </script>
+
+
+
+<body>
+	<!-- Search -->
+	
+    <a class="nav-search" data-toggle="modal" data-target="#searchModalCenter">
+      <i class="fa fa-search"></i>
+    </a>
+    
+    <div
+      class="modal fade"
+      id="searchModalCenter"
+      tabindex="-1"
+      role="dialog"
+      aria-labelledby="searchModalCenterTitle"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <input
+              type="text"
+              id="local-search-input"
+              class="form-control"
+              placeholder=""
+            />
+          </div>
+          <div class="modal-body">
+            <div id="local-search-result"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <script type="text/javascript">
+      // define the search function
+      var searchFunc = function(path, search_id, content_id) {
+        "use strict";
+        $.ajax({
+          url: path,
+          dataType: "xml",
+          success: function(xmlResponse) {
+            // get the contents from search data
+            var datas = $("entry", xmlResponse)
+              .map(function() {
+                return {
+                  title: $("title", this).text(),
+                  content: $("content", this).text(),
+                  url: $("id", this).text()
+                };
+              })
+              .get();
+            var $input = document.getElementById(search_id);
+            var $resultContent = document.getElementById(content_id);
+            $input.addEventListener("input", function() {
+              var str = '<ul class="search-result-list">';
+              var keywords = this.value
+                .trim()
+                .toLowerCase()
+                .split(/[\s\-]+/);
+              $resultContent.innerHTML = "";
+              if (this.value.trim().length <= 0) {
+                return;
+              }
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = true;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content
+                  .trim()
+                  .replace(/<[^>]+>/g, "")
+                  .toLowerCase();
+                var data_url = data.url;
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if (data_title != "" && data_content != "") {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if (index_title < 0 && index_content < 0) {
+                      isMatch = false;
+                    } else {
+                      if (index_content < 0) {
+                        index_content = 0;
+                      }
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  str +=
+                    "<li><a href='" +
+                    data_url +
+                    "' class='search-result-title'>" +
+                    data_title +
+                    "</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g, "");
+                  if (first_occur >= 0) {
+                    // cut out 30 characters
+                    var start = first_occur - 15;
+                    var end = first_occur + 15;
+                    if (start < 0) {
+                      start = 0;
+                    }
+                    if (start == 0) {
+                      end = 30;
+                    }
+                    if (end > content.length) {
+                      end = content.length;
+                    }
+    
+                    var match_content = content.substr(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword) {
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(
+                        regS,
+                        '<em class="search-keyword">' + keyword + "</em>"
+                      );
+                    });
+    
+                    str += '<p class="search-result">' + match_content + "...</p>";
+                  }
+                  str += "</li>";
+                }
+              });
+              str += "</ul>";
+              $resultContent.innerHTML = str;
+            });
+          }
+        });
+      };
+    
+      // use atom.xml to search blog
+      searchFunc("/atom.xml", "local-search-input", "local-search-result");
+      $("#searchModalCenter").on("shown.bs.modal", function(e) {
+        setTimeout(function() {
+          $("#local-search-input").focus();
+        }, 1);
+      });
+    </script>
+
+
+    <!-- Content -->
+    <section class="article-container">
+    <!-- Back Home -->
+    <a class="nav-back" href="/">
+    <font size="16">田耐里</font>
+</a>
+
+        <!-- Page Header -->
+        <header class="intro-header">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <div class="post-heading">
+                            <h1>
+                                胡瓜鱼 前进
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Post Content -->
+        <article>
+            <div class="container">
+                <div class="row">
+                    <!-- Post Main Content -->
+                    <div class="post-content col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <p>我的蠢猫从高处跌落，死了。<a id="more"></a>搬进这里不久它就从窗台跳下去一次，但那次新翻修的软软的草甸救了它。它在草里打了个滚，我下去把它抱上来，一身厚重的草腥味，像抱了个兔子。我们又熬过一个冬季，刚刚破冰，冻土层上面刚有点生命的小动静，它又跳下去了，这次谁也救不了它。猫只有一条命。怪我，是我开窗换换气，它溜出去也没留意。它去窗台干什么呢，抓苍蝇，抓鸟，或者就像上次一样，只是想跳下去看看下面有什么。我把它喂得也太好了，我再没见过一只田园猫，可以长那么壮。它跌落得瞬间，会恨我吗。会吧，人可真猴精，自己平衡饮食，给我瞎鸡巴喂。害我在空中捣腾姿势的时间都没有，直接向着大地，砸下去。</p>
+<p>有那么一会儿，我也想跌下去。我站在窗台上，眼睛笔直地望着下面。我把脚迈进空气里，半秒钟后就被吸到地面上，听见自己骨头折碎的沉闷的声音。我应该不会死的很快，肉体总是比思想贪婪的多，我像一袋湿水泥一样瘫坐在地，像小时候玩的那种在气球里填满石灰的塑性玩具。我就瘫在那里，口干舌燥但说不出话。要不是身体以反关节形态扭曲着，人们还以为我在进行日光浴。我等两双白花花的手将我抬起，等穿蓝袍子拿着刀的法师对我轻语“还有什么未了的心愿吗，尽快”我会说来盘清蒸胡瓜鱼。我会亲自指导他为我开刀，我说等大病初愈就直播跳楼。只等看见自己摔碎的内脏，我才觉得大势已去。我左手握着右手，灰溜溜地断气。</p>
+<p>失去爱犬和爱猫的感觉不太一样。我曾失去过很多狗，像执着的追求者忽然停止了他的追求，开始难以适应，而后如释重负。人不太担得起来自狗的爱的，何况生命终会归于尘土。而失去猫，像是被人狠狠回绝给了一巴掌还自行切断联络。陷入自责里，以为自己做得不够，但是再也无法自证。我懵着脑袋打印了几十页寻猫启示，上一秒还希望它能找回来，下一秒就转为希望它能被人拣去只要活着便好。接了物业的电话，确实死了，尸体被环卫工人扔在垃圾车了。我的同伴在等我哭，可我没有，悲伤时候无法对任何同情投怀送抱，我告别了他们，选择在儿童乐园的长椅上崩溃。正午，地上可真冰冷啊，就不能让我抱着吗。我想我的2B。闭上眼，想它像小狗一样拿湿哒哒的长鼻子拱着我的手心，求摸它的头。想它的利爪在我的胳膊上推搡，边踩奶边发出呼噜呼噜的声音。越想越觉得我应该抱抱它，我选择了前去翻垃圾车，此时才感慨没有垃圾分类制度真的恼火。垃圾包罗万象，什么都有。除了食物残余，我翻到了一包纸尿裤，漏了一手尿。太多的建材垃圾，半米长的地砖叠了一摞，搬不动。一点办法都没有，不能叫人和我一起翻垃圾吧。翻到天黑，什么也没翻到，上楼休息。凌晨四点被惊醒，跑到窗台，垃圾车被换了，什么都没了。这是个效率十分低下的国家，不想清理尸体和换垃圾车简直效率得惊人。想起几个月前还在惊异于同学把猫尸体烧成骨灰准备回国打钻戒这个主意，现在自己连骨灰也没有，围绕我的时空变化太快宛如一个玩笑。我没有什么能失去的了。和蠢猫的缘分到此结束了。你活着时我待你不错，死了时我只能放过自己。不然我也不知道怎么办，不然聪明的你，告诉我，我该怎么办。</p>
+
+
+                            <!-- Meta -->
+                            <div class="post-meta">
+                                <hr>
+                                <br>
+                                <div class="post-tags">
+                                    
+                                        
+
+<a href="/tags/文章/">#文章</a>
+
+
+                                            
+                                </div>
+                                <div class="post-date">
+                                    2018 年 05 月 28 日
+                                </div>
+                            </div>
+                    </div>
+
+                    <!-- Comments -->
+                    <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                        <i class="fa fa-paw" aria-hidden="true"></i><span> 留言</span>
+<head>
+    <script src="/js/src/Valine.min.js"></script>
+    <script src='//unpkg.com/valine/dist/Valine.min.js'></script>
+</head>
+
+<body>
+    <div id="vcomments"></div>
+    <script>
+    var GUEST_INFO=["nick","mail","link"],
+    guest_info="nick,mail".split(",").
+    filter(function(e){return GUEST_INFO.indexOf(e)>-1});
+    guest_info = guest_info.length == 0 ? GUEST_INFO :guest_info;
+    var verify = 'false' == true;
+new Valine({
+    el: '#vcomments' ,
+    appId: 'D1gAVrrs69QsQXCmMa8xnw09-gzGzoHsz',
+    appKey: 'OBFR8X1YHEylR5rX7MYVwYSH',
+    verify: false,
+    avatar:'hide',
+    guest_info: guest_info,
+    notify: true,
+    recordIP: false,
+    placeholder: '这是一个评论模块(๑•ᴗ•๑)这显得很酷',
+    pageSize:"10"
+});
+	$(document).ready(function(){
+    $('.vemoji-btn').text('😀');
+    $("#vcomments").on('click', 'span.vat',function(){
+        $(this).parent('div.vmeta').next("div.vcontent").after($("div.vwrap"));
+        $('textarea#veditor').focus();
+    })
+})
+if(window.location.hash){
+    var checkExist = setInterval(function() {
+        if ($(window.location.hash).length) {
+            $('html, body').animate({scrollTop: $(window.location.hash).offset().top-90}, 1000);
+            clearInterval(checkExist);
+        }
+    }, 100);
+}
+    </script>
+</body>
+
+                    </div>
+                </div>
+            </div>
+        </article>
+</section>
+
+<!-- Image viewer-->
+
+    <!-- Custom picture view-->
+    <link href="/css/viewer.min.css" rel="stylesheet" />
+    <script
+      src="/js/viewer.min.js"
+      type="text/javascript"
+      charset="utf-8"
+    ></script>
+    
+    <script type="text/javascript">
+      // set image viewer
+      Viewer.setDefaults({
+        zoomRatio: [0.5],
+        navbar: false,
+        toolbar: false,
+        button: false,
+        title: [2, (image, imageData) => `${image.alt}`],
+        show: function() {
+          this.viewer.zoomTo(0.5);
+        }
+      });
+      var imageList = document.getElementsByTagName("img");
+      Array.prototype.forEach.call(imageList, element => {
+        var viewer = new Viewer(element);
+      });
+    </script>
+
+    
+    <!-- Scripts -->
+     <footer class="footer">
+         </P> <span>田耐里 <i class="fa fa-smile-o"></i> 2017-</span><script>document.write(new Date().getFullYear())</script>
+        
+</footer>
+    <!-- Google Analytics -->
+    
+
+    <!-- Service Worker -->
+    <!-- if using service worker -->
+
+    
+</body>
+
+</html>

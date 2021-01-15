@@ -1,0 +1,11 @@
+@font-face {
+  font-family: Consolas, Helvetica;
+  font-style: normal;
+  unicode-range: U+30-39, U+61-7a, U+41-5a, U+0400-052f;
+}
+@font-face {
+  font-family: fangzheng;
+  font-style: normal;
+  src: url("fonts/fangzheng.TTF");
+  unicode-range: U+4E00-9FA5;
+}
